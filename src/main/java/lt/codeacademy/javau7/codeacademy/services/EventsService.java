@@ -3,6 +3,7 @@ package lt.codeacademy.javau7.codeacademy.services;
 import lt.codeacademy.javau7.codeacademy.entities.Events;
 import lt.codeacademy.javau7.codeacademy.entities.User;
 import lt.codeacademy.javau7.codeacademy.repositories.EventsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,14 +12,14 @@ import java.util.List;
 
 @Service
 public class EventsService {
-
     private final EventsRepository eventsRepository;
     private final UserService userService;
-
-    EventsService(EventsRepository eventsRepository, UserService userService){
+    @Autowired
+    public EventsService(EventsRepository eventsRepository, UserService userService) {
         this.eventsRepository = eventsRepository;
         this.userService = userService;
     }
+
     public List<Events> getAllEvents(){
         return eventsRepository.findAll();
     }

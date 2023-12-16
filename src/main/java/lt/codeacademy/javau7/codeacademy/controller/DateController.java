@@ -2,6 +2,7 @@ package lt.codeacademy.javau7.codeacademy.controller;
 
 import lt.codeacademy.javau7.codeacademy.entities.Date;
 import lt.codeacademy.javau7.codeacademy.services.DateService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,19 +14,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/dashboard/settings/date")
 public class DateController {
-
-    private final DateService dateService;
-
-    DateController(DateService dateService) {
-        this.dateService = dateService;
-    }
+    @Autowired
+    DateService dateService;
 
     @GetMapping
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<Date> getAllDates() {
         return dateService.getAllDates();
     }
 
     @PostMapping("/stuff")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<List<Date>> getUserByStuffId(@RequestBody Map<String, Long> stuffId) {
         if (stuffId.containsKey("stuffId")) {
             Long id = stuffId.get("stuffId");
@@ -42,16 +41,19 @@ public class DateController {
     }
 
     @PostMapping
+    @PreAuthorize(" hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<String> saveDate(@RequestBody Date date){
         return dateService.saveDate(date);
     }
 
     @PutMapping("/{dateId}")
-    public Date updateDateById(@PathVariable Long dateId, @RequestBody Date updateDate){
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<String> updateDateById(@PathVariable Long dateId, @RequestBody Date updateDate){
         return dateService.updateDateById(dateId, updateDate);
     }
 
     @DeleteMapping("/{dateId}")
+    @PreAuthorize(" hasRole('MODERATOR') or hasRole('ADMIN')")
     public void deleteDate(@PathVariable Long dateId){
         dateService.deleteDate(dateId);
     }

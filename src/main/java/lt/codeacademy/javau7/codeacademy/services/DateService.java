@@ -41,15 +41,16 @@ public class DateService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating date: " + e.getMessage());
         }
     }
-    public Date updateDateById(Long dateId, Date updateDate) {
+    public ResponseEntity<String> updateDateById(Long dateId, Date updateDate) {
         Optional<Date> existingDate = dateRepository.findById(dateId);
         if(existingDate.isPresent()){
             Date date = existingDate.get();
             date.setDate(updateDate.getDate());
             date.setTimes(updateDate.getTimes());
             dateRepository.save(date);
+            return ResponseEntity.ok("Date updated successfully.");
         }
-        return null;
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Date not found with ID: " + dateId);
     }
     public void deleteDate(Long dateId){
         dateRepository.deleteById(dateId);
