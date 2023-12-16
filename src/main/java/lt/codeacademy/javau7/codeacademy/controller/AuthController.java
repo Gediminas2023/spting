@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 
 import lt.codeacademy.javau7.codeacademy.config.JwtUtils;
-import lt.codeacademy.javau7.codeacademy.config.UserDetailsImpl;
+import lt.codeacademy.javau7.codeacademy.config.UserDetail;
 import lt.codeacademy.javau7.codeacademy.entities.ERole;
 import lt.codeacademy.javau7.codeacademy.entities.Role;
 import lt.codeacademy.javau7.codeacademy.entities.User;
@@ -18,6 +18,7 @@ import lt.codeacademy.javau7.codeacademy.payload.response.JwtResponse;
 import lt.codeacademy.javau7.codeacademy.payload.response.MessageResponse;
 import lt.codeacademy.javau7.codeacademy.repositories.RoleRepository;
 import lt.codeacademy.javau7.codeacademy.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,23 +37,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    protected final AuthenticationManager authenticationManager;
-
-    protected final UserRepository userRepository;
-
-    protected final RoleRepository roleRepository;
-
-    protected final PasswordEncoder encoder;
-
-    protected final JwtUtils jwtUtils;
-
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder encoder, JwtUtils jwtUtils) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.encoder = encoder;
-        this.jwtUtils = jwtUtils;
-    }
+    @Autowired
+    AuthenticationManager authenticationManager;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    RoleRepository roleRepository;
+    @Autowired
+    PasswordEncoder encoder;
+    @Autowired
+    JwtUtils jwtUtils;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -63,7 +57,7 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        UserDetail userDetails = (UserDetail) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
@@ -93,7 +87,7 @@ public class AuthController {
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
-        Set<String> strRoles = signUpRequest.getRole();
+        Set<String> strRoles = signUpRequest.getRoles();
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
@@ -101,25 +95,11 @@ public class AuthController {
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
         } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
+            strRoles.forEach(roleName -> {
+                ERole eRole = ERole.valueOf(roleName);
+                Role roleEntity = roleRepository.findByName(eRole)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                roles.add(roleEntity);
             });
         }
 

@@ -1,6 +1,6 @@
 package lt.codeacademy.javau7.codeacademy.config;
 
-import java.io.Serial;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -13,23 +13,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class UserDetailsImpl implements UserDetails {
-    @Serial
+public class UserDetail implements UserDetails {
     private static final long serialVersionUID = 1L;
 
-    private final Long id;
+    private Long id;
 
-    private final String username;
+    private String username;
 
-    private final String email;
+    private String email;
 
     @JsonIgnore
     private String password;
 
-    private final Collection<? extends GrantedAuthority> authorities;
+    private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String username, String email, String password,
-                           Collection<? extends GrantedAuthority> authorities) {
+    public UserDetail(Long id, String username, String email, String password,
+                      Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -37,12 +36,12 @@ public class UserDetailsImpl implements UserDetails {
         this.authorities = authorities;
     }
 
-    public static UserDetailsImpl build(User user) {
+    public static UserDetail build(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toList());
 
-        return new UserDetailsImpl(
+        return new UserDetail(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -99,7 +98,7 @@ public class UserDetailsImpl implements UserDetails {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        UserDetailsImpl user = (UserDetailsImpl) o;
+        UserDetail user = (UserDetail) o;
         return Objects.equals(id, user.id);
     }
 }

@@ -1,6 +1,5 @@
 package lt.codeacademy.javau7.codeacademy.config;
 
-
 import java.security.Key;
 import java.util.Date;
 
@@ -26,7 +25,7 @@ public class JwtUtils {
 
     public String generateJwtToken(Authentication authentication) {
 
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        UserDetail userPrincipal = (UserDetail) authentication.getPrincipal();
 
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))

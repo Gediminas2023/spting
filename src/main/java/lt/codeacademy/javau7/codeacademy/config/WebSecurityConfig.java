@@ -1,5 +1,6 @@
 package lt.codeacademy.javau7.codeacademy.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,17 +25,14 @@ import java.util.List;
 @EnableMethodSecurity
 
 public class WebSecurityConfig {
-    protected final UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    UserDetailsService userDetailsService;
+    @Autowired
+     AuthEntryPointJwt unauthorizedHandler;
 
-    protected final AuthEntryPointJwt unauthorizedHandler;
-
-    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
-        this.userDetailsService = userDetailsService;
-        this.unauthorizedHandler = unauthorizedHandler;
-    }
 
     @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
+    public AuthTokenFilter authenticationJwtTokenFilter(){
         return new AuthTokenFilter();
     }
 
@@ -62,7 +60,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
