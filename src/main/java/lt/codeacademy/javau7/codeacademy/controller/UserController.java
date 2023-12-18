@@ -15,8 +15,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    @Autowired
-    UserService userService;
+    private final UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     @PreAuthorize(" hasRole('MODERATOR') or hasRole('ADMIN')")
